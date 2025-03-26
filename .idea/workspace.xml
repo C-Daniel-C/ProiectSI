@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="22215a20-cc67-4814-bddc-2ea6cceb5a89" name="Changes" comment="Server-Client Multi-Threading" />
+    <list default="true" id="22215a20-cc67-4814-bddc-2ea6cceb5a89" name="Changes" comment="Commit" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,6 +27,9 @@
         <entry key="FLASK_APP" value="app" />
       </map>
     </option>
+  </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="origin/master" />
   </component>
   <component name="Git.Settings">
     <option name="PUSH_AUTO_UPDATE" value="true" />
@@ -147,7 +150,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1741854397022</updated>
-      <workItem from="1742974098597" duration="9407000" />
+      <workItem from="1742974098597" duration="9541000" />
     </task>
     <task id="LOCAL-00001" summary="Server-Client Multi-Threading">
       <created>1743000246977</created>
@@ -156,7 +159,14 @@
       <option name="project" value="LOCAL" />
       <updated>1743000246977</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Commit">
+      <created>1743000468669</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1743000468669</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -175,6 +185,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Server-Client Multi-Threading" />
-    <option name="LAST_COMMIT_MESSAGE" value="Server-Client Multi-Threading" />
+    <MESSAGE value="Commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="Commit" />
   </component>
 </project>
