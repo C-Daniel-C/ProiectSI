@@ -95,23 +95,34 @@ class AES:
         self.state = [self.state[0], np.roll(self.state[1], -1), np.roll(self.state[2], -2), np.roll(self.state[3], -3)]
 
     def mix_columns(self):  # Page 17 https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.197.pdf
-        mix_mat = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
-        ori = copy(self.state)
+        #mix_mat = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
         s = copy(self.state)
-        col = [0]*4
         sp = []
-        s0 = -1
         for c in range(0, 4):
-            t1 = fmul(s[0][c],0x02)
-            t2 = fmul(s[1][c],0x03)
-            t3 = fadd(t1, t2)
-            t4 = fadd(t3, s[2][c])
-            t5 = fadd(t4, s[3][c])
-            s0 = t5
-        print("ooo ",s0)
+            col = [0] * 4
+            p1 = fadd(fmul(s[0][c], 0x02), fmul(s[1][c], 0x03))
+            p2 = fadd(p1, s[2][c])
+            p3 = fadd(p2, s[3][c])
+            col[0] = p3
 
-     # TODO all lines
+            p1 = fadd(fmul(s[1][c], 0x02), fmul(s[2][c], 0x03))
+            p2 = fadd(s[0][c], p1)
+            p3 = fadd(p2, s[3][c])
+            col[1] = p3
 
+            p1 = fadd(fmul(s[2][c], 0x02), fmul(s[3][c], 0x03))
+            p2 = fadd(s[0][c], s[1][c])
+            p3 = fadd(p2, p1)
+            col[2] = p3
+
+            p1 = fmul(s[0][c], 0x03)
+            p2 = fadd(p1, s[1][c])
+            p3 = fadd(p2, s[2][c])
+            p4 = fmul(s[3][c], 0x02)
+            p5 = fadd(p3, p4)
+            col[3] = p5
+            sp.append(col)
+        self.state = sp #VERY UNSURE IF THIS WORKS
 
 if __name__ == '__main__':
     plain_text = "Hello World!"
@@ -128,8 +139,6 @@ if __name__ == '__main__':
     print(aes)
     aes.mix_columns()
     print(aes)
-
-
 
 """ 
 Useful: https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
