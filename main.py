@@ -55,7 +55,7 @@ class AES:
     def __init__(self):
         self.state = None
         self.key = None
-        self.keys = None
+        self.keys = []
 
     def create_state(self, p_text):
         text_bytes = bytearray(p_text.encode())
@@ -126,33 +126,51 @@ class AES:
         self.state = sp  # VERY UNSURE IF THIS WORKS
 
     def key_expansion(self):
-        key = self.key
+        key = self.key.tolist()
         key_count = 1
+
         col_count = 0
         index = 3
-        col = [0] * 4
-        for i in range(0, 4):
-            col[i] = self.key[i][index]
-
-        # Rotate Phase:
-        carry = col[0]
-        col = col[1:4]
-        col.append(carry)
-
-        # Sub-Bytes Phase:
-        for i in range(0, 4):
-            splittable = format(col[i], '08b')  # Pads with 0
-            x = int(splittable[:4], base=2)  # First nibble (4 bits)
-            y = int(splittable[4:], base=2)  # Second nibble
-            col[i] = sbox[x][y]
-
-        # XOR Phase (first column only):
-        if col_count % 4 == 0:
+        for r in range(0, 36):
+            full_key = []
+            col = [0] * 4
             for i in range(0, 4):
-                col[i] = key[i][index - 3] ^ col[i]
-                col[i] = col[i] ^ rcon[i][key_count-1]
-            col_count += 1
-        print(col)
+                col[i] = key[i][index + r]
+
+            if r % 4 == 0:
+                # Rotate Phase:
+                carry = col[0]
+                col = col[1:4]
+                col.append(carry)
+
+                # Sub-Bytes Phase:
+                for i in range(0, 4):
+                    splittable = format(col[i], '08b')  # Pads with 0
+                    x = int(splittable[:4], base=2)  # First nibble (4 bits)
+                    y = int(splittable[4:], base=2)  # Second nibble
+                    col[i] = sbox[x][y]
+
+                # XOR Phase:
+                for i in range(0, 4):
+                    col[i] = key[i][r + index - 3] ^ col[i]
+                    col[i] = col[i] ^ rcon[i][r%4]
+
+                # Add to keys columns
+                for i in range(0, 4):
+                    key[i].append(col[i])
+                full_key.append(col)
+            else:
+                for i in range(0, 4):
+                    col[i] = key[i][r + index -1] ^ col[i]
+                # Add to keys columns
+                for i in range(0, 4):
+                    key[i].append(col[i])
+                full_key.append(col)
+
+            if r%4 and r!=0:
+                self.keys.append(full_key)
+                full_key = []
+        self.key = key
 
 
 if __name__ == '__main__':
@@ -163,6 +181,8 @@ if __name__ == '__main__':
     aes.create_key(plain_key)
     print(aes.key)
     aes.key_expansion()
+    print(aes.keys[4])
+
     # print(aes)
     # aes.add_round_key()
     # print(aes)
