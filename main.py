@@ -4,7 +4,7 @@ from bitarray import bitarray
 from s_box import sbox, invsbox
 
 
-def to_hex(in_mat):
+def mat_to_hex(in_mat):
     mat_hex = []
     for i in range(0, 4):
         for j in range(0, 4):
@@ -13,12 +13,42 @@ def to_hex(in_mat):
     return mat_hex
 
 
-def fmul(a, b):
-    return 0  # TODO
+def bitarray_to_int(inarr: bitarray):
+    int_val = 0
+    p = 1
+    for i in range(0, 8):
+        if inarr[7 - i] == 1:
+            int_val += p
+        p *= 2
+    return int_val
+
+
+def fmul(b, mul):
+    b = bitarray(format(b, '08b'))
+    ori = b.copy()
+
+    if mul == 1:
+        return b
+    if mul == 2:
+        if b[0] == 0:
+            b = b[1:8]
+            b.append(0)
+        elif b[0] == 1:
+            b <<= 1
+            b = b ^ bitarray('00011011')
+    elif mul == 3:
+        if b[0] == 0:
+            b <<= 1
+            b = b ^ ori
+        elif b[0] == 1:
+            b <<= 1
+            b = b ^ bitarray('00011011')
+            b = b ^ ori
+    return bitarray_to_int(b)
 
 
 def fadd(a, b):
-    return 0  # TODO
+    pass  # return a ^ b
 
 
 class AES:
@@ -42,7 +72,7 @@ class AES:
     def __str__(self):
         to_print = ""
         # to_print = f"key:\n{to_hex(self.key)}\n"
-        to_print += f"state:\n{to_hex(self.state)}\n"
+        to_print += f"state:\n{mat_to_hex(self.state)}\n"
         return to_print
 
     def create_key(self, p_key):
@@ -68,16 +98,16 @@ class AES:
         mix_mat = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
         ori = copy(self.state)
         s = copy(self.state)
-        sp = [[0] * 4] * 4  # Empty 4x4 array
-        col = []
+        col = [0]*4
+        sp = []
         for c in range(0, 4):
             t1 = fmul(0x02, s[0][c])
             t2 = fmul(0x03, s[1][c])
             t3 = fadd(t1, t2)
             t4 = fadd(t3, s[2][c])
             t5 = fadd(t4, s[3][c])
-            sp[0][c] = t5
-            #TODO all lines
+            col[0] = t5
+            # TODO all lines
         print(sp)
 
 
@@ -96,6 +126,8 @@ if __name__ == '__main__':
     print(aes)
     aes.mix_columns()
     print(aes)
+
+
 
 """ 
 Useful: https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
