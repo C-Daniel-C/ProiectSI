@@ -48,7 +48,7 @@ def fmul(b, mul):
 
 
 def fadd(a, b):
-    pass  # return a ^ b
+    return a ^ b
 
 
 class AES:
@@ -100,15 +100,17 @@ class AES:
         s = copy(self.state)
         col = [0]*4
         sp = []
+        s0 = -1
         for c in range(0, 4):
-            t1 = fmul(0x02, s[0][c])
-            t2 = fmul(0x03, s[1][c])
+            t1 = fmul(s[0][c],0x02)
+            t2 = fmul(s[1][c],0x03)
             t3 = fadd(t1, t2)
             t4 = fadd(t3, s[2][c])
             t5 = fadd(t4, s[3][c])
-            col[0] = t5
-            # TODO all lines
-        print(sp)
+            s0 = t5
+        print("ooo ",s0)
+
+     # TODO all lines
 
 
 if __name__ == '__main__':
