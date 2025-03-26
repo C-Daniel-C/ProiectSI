@@ -1,7 +1,7 @@
 from copy import copy
 import numpy as np
 from bitarray import bitarray
-from s_box import sbox, invsbox
+from aes_constants import sbox, invsbox, rcon
 
 
 def mat_to_hex(in_mat):
@@ -55,6 +55,7 @@ class AES:
     def __init__(self):
         self.state = None
         self.key = None
+        self.keys = None
 
     def create_state(self, p_text):
         text_bytes = bytearray(p_text.encode())
@@ -71,7 +72,7 @@ class AES:
 
     def __str__(self):
         to_print = ""
-        # to_print = f"key:\n{to_hex(self.key)}\n"
+        # to_print = f"key:\n{hex(self.key)}\n"
         to_print += f"state:\n{mat_to_hex(self.state)}\n"
         return to_print
 
@@ -95,7 +96,7 @@ class AES:
         self.state = [self.state[0], np.roll(self.state[1], -1), np.roll(self.state[2], -2), np.roll(self.state[3], -3)]
 
     def mix_columns(self):  # Page 17 https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.197.pdf
-        #mix_mat = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
+        # mix_mat = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
         s = copy(self.state)
         sp = []
         for c in range(0, 4):
@@ -122,23 +123,55 @@ class AES:
             p5 = fadd(p3, p4)
             col[3] = p5
             sp.append(col)
-        self.state = sp #VERY UNSURE IF THIS WORKS
+        self.state = sp  # VERY UNSURE IF THIS WORKS
+
+    def key_expansion(self):
+        key = self.key
+        key_count = 1
+        col_count = 0
+        index = 3
+        col = [0] * 4
+        for i in range(0, 4):
+            col[i] = self.key[i][index]
+
+        # Rotate Phase:
+        carry = col[0]
+        col = col[1:4]
+        col.append(carry)
+
+        # Sub-Bytes Phase:
+        for i in range(0, 4):
+            splittable = format(col[i], '08b')  # Pads with 0
+            x = int(splittable[:4], base=2)  # First nibble (4 bits)
+            y = int(splittable[4:], base=2)  # Second nibble
+            col[i] = sbox[x][y]
+
+        # XOR Phase (first column only):
+        if col_count % 4 == 0:
+            for i in range(0, 4):
+                col[i] = key[i][index - 3] ^ col[i]
+                col[i] = col[i] ^ rcon[i][key_count-1]
+            col_count += 1
+        print(col)
+
 
 if __name__ == '__main__':
     plain_text = "Hello World!"
-    plain_key = "abcdefghij"
+    plain_key = "abcdefghijklmop"
     aes = AES()
     aes.create_state(plain_text)
     aes.create_key(plain_key)
-    print(aes)
-    aes.add_round_key()
-    print(aes)
-    aes.sub_bytes()
-    print(aes)
-    aes.shift_rows()
-    print(aes)
-    aes.mix_columns()
-    print(aes)
+    print(aes.key)
+    aes.key_expansion()
+    # print(aes)
+    # aes.add_round_key()
+    # print(aes)
+    # aes.sub_bytes()
+    # print(aes)
+    # aes.shift_rows()
+    # print(aes)
+    # aes.mix_columns()
+    # print(aes)
 
 """ 
 Useful: https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
