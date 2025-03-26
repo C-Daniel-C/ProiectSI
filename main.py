@@ -153,7 +153,7 @@ class AES:
                 # XOR Phase:
                 for i in range(0, 4):
                     col[i] = key[i][r + index - 3] ^ col[i]
-                    col[i] = col[i] ^ rcon[i][r%4]
+                    col[i] = col[i] ^ rcon[i][r % 4]
 
                 # Add to keys columns
                 for i in range(0, 4):
@@ -161,16 +161,15 @@ class AES:
                 full_key.append(col)
             else:
                 for i in range(0, 4):
-                    col[i] = key[i][r + index -1] ^ col[i]
+                    col[i] = key[i][r + index - 1] ^ col[i]
                 # Add to keys columns
                 for i in range(0, 4):
                     key[i].append(col[i])
                 full_key.append(col)
 
-            if r%4 and r!=0:
+            if r % 4 and r != 0:
                 self.keys.append(full_key)
                 full_key = []
-        self.key = key
 
 
 if __name__ == '__main__':
@@ -181,7 +180,7 @@ if __name__ == '__main__':
     aes.create_key(plain_key)
     print(aes.key)
     aes.key_expansion()
-    print(aes.keys[4])
+    print(aes.keys) #TODO: FIX THIS
 
     # print(aes)
     # aes.add_round_key()
