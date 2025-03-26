@@ -1,0 +1,166 @@
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from copy import copy\r\nimport numpy as np\r\nfrom bitarray import bitarray\r\nfrom s_box import sbox, invsbox\r\n\r\n\r\ndef to_hex(in_mat):\r\n    mat_hex = []\r\n    for i in range(0, 4):\r\n        for j in range(0, 4):\r\n            mat_hex.append(hex(in_mat[i][j]))\r\n    mat_hex = np.array(mat_hex).reshape(4, 4)\r\n    return mat_hex\r\n\r\n\r\ndef fmul(a, b):\r\n    return 0  # TODO\r\n\r\n\r\ndef fadd(a, b):\r\n    return 0  # TODO\r\n\r\n\r\nclass AES:\r\n    def __init__(self):\r\n        self.state = None\r\n        self.key = None\r\n\r\n    def create_state(self, p_text):\r\n        text_bytes = bytearray(p_text.encode())\r\n        dif = (16 - len(text_bytes))\r\n        while len(text_bytes) < 16:  # PKCS#7 padding: Adding the number of missing bytes\r\n            text_bytes.append(dif)\r\n\r\n        self.state = np.array(text_bytes).reshape(4, 4, order='F')  # By columns\r\n\r\n    def add_round_key(self):\r\n        for i in range(0, 4):\r\n            for j in range(0, 4):\r\n                self.state[i][j] = self.state[i][j] ^ self.key[i][j]\r\n\r\n    def __str__(self):\r\n        to_print = \"\"\r\n        # to_print = f\"key:\\n{to_hex(self.key)}\\n\"\r\n        to_print += f\"state:\\n{to_hex(self.state)}\\n\"\r\n        return to_print\r\n\r\n    def create_key(self, p_key):\r\n        key_bytes = bytearray(p_key.encode())\r\n        dif = (16 - len(key_bytes))\r\n        while len(key_bytes) < 16:  # PKCS#7 padding: Adding the number of missing bytes\r\n            key_bytes.append(dif)\r\n\r\n        self.key = np.array(key_bytes).reshape(4, 4, order='F')  # By columns\r\n\r\n    def sub_bytes(self):  # Re-assign values based on the AES S Box\r\n        for i in range(0, 4):\r\n            for j in range(0, 4):\r\n                splittable = format(self.state[i][j], '08b')  # Pads with 0\r\n                x = int(splittable[:4], base=2)  # First nibble (4 bits)\r\n                y = int(splittable[4:], base=2)  # Second nibble\r\n                self.state[i][j] = sbox[x][y]\r\n\r\n    def shift_rows(self):  # Shift rows by their indices to the left\r\n        self.state = [self.state[0], np.roll(self.state[1], -1), np.roll(self.state[2], -2), np.roll(self.state[3], -3)]\r\n\r\n    def mix_columns(self):  # Page 17 https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.197.pdf\r\n        mix_mat = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]\r\n        ori = copy(self.state)\r\n        s = copy(self.state)\r\n        sp = [[0] * 4] * 4  # Empty 4x4 array\r\n        col = []\r\n        for c in range(0, 4):\r\n            t1 = fmul(0x02, s[0][c])\r\n            t2 = fmul(0x03, s[1][c])\r\n            t3 = fadd(t1, t2)\r\n            t4 = fadd(t3, s[2][c])\r\n            t5 = fadd(t4, s[3][c])\r\n            sp[0][c] = t5\r\n            #TODO all lines\r\n        print(sp)\r\n\r\n\r\nif __name__ == '__main__':\r\n    plain_text = \"Hello World!\"\r\n    plain_key = \"abcdefghij\"\r\n    aes = AES()\r\n    aes.create_state(plain_text)\r\n    aes.create_key(plain_key)\r\n    print(aes)\r\n    aes.add_round_key()\r\n    print(aes)\r\n    aes.sub_bytes()\r\n    print(aes)\r\n    aes.shift_rows()\r\n    print(aes)\r\n    aes.mix_columns()\r\n    print(aes)\r\n\r\n\"\"\" \r\nUseful: https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html\r\n\"\"\"\r\n\r\n\"\"\" \r\nFrom: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197-upd1.pdf\r\n1: procedure CIPHER(in, Nr, w)\r\n    2: state ← in \r\n    3: state ← ADDROUNDKEY(state,w[0..3])\r\n    4: for round from 1 to Nr −1 do\r\n        5: state ← SUBBYTES(state) \r\n        6: state ← SHIFTROWS(state)\r\n        7: state ← MIXCOLUMNS(state) \r\n        8: state ← ADDROUNDKEY(state,w[4 ∗ round..4 ∗ round +3])\r\n    9: end for\r\n    10: state ← SUBBYTES(state)\r\n    11: state ← SHIFTROWS(state)\r\n    12: state ← ADDROUNDKEY(state,w[4 ∗Nr..4 ∗Nr +3])\r\n    13: return state\r\n14: end procedure \r\n\"\"\"\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+--- a/main.py	(revision 29a09307640343153a48ab6667f1fa60d7535afb)
++++ b/main.py	(date 1742992843860)
+@@ -14,6 +14,7 @@
+ 
+ 
+ def fmul(a, b):
++
+     return 0  # TODO
+ 
+ 
+@@ -78,7 +79,7 @@
+             t5 = fadd(t4, s[3][c])
+             sp[0][c] = t5
+             #TODO all lines
+-        print(sp)
++        print("sp: ", sp)
+ 
+ 
+ if __name__ == '__main__':
+@@ -96,6 +97,7 @@
+     print(aes)
+     aes.mix_columns()
+     print(aes)
++    print("====")
+ 
+ """ 
+ Useful: https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
+Index: .idea/ProiectSI.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<module type=\"PYTHON_MODULE\" version=\"4\">\r\n  <component name=\"NewModuleRootManager\">\r\n    <content url=\"file://$MODULE_DIR$\">\r\n      <excludeFolder url=\"file://$MODULE_DIR$/.venv\" />\r\n    </content>\r\n    <orderEntry type=\"jdk\" jdkName=\"Python 3.11 (ProiectSI)\" jdkType=\"Python SDK\" />\r\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\r\n  </component>\r\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/ProiectSI.iml b/.idea/ProiectSI.iml
+--- a/.idea/ProiectSI.iml	(revision 29a09307640343153a48ab6667f1fa60d7535afb)
++++ b/.idea/ProiectSI.iml	(date 1742974343462)
+@@ -4,7 +4,10 @@
+     <content url="file://$MODULE_DIR$">
+       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+     </content>
+-    <orderEntry type="jdk" jdkName="Python 3.11 (ProiectSI)" jdkType="Python SDK" />
++    <orderEntry type="jdk" jdkName="Python 3.11" jdkType="Python SDK" />
+     <orderEntry type="sourceFolder" forTests="false" />
+   </component>
++  <component name="PyDocumentationSettings">
++    <option name="renderExternalDocumentation" value="true" />
++  </component>
+ </module>
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"22215a20-cc67-4814-bddc-2ea6cceb5a89\" name=\"Changes\" comment=\"\" />\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\"><![CDATA[{\r\n  \"associatedIndex\": 4\r\n}]]></component>\r\n  <component name=\"ProjectId\" id=\"2uFpuERxgPJVpeWMz5M9ZLlNqof\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"git-widget-placeholder\": \"master\"\r\n  }\r\n}]]></component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-python-sdk-fb887030ada0-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.21565.199\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"22215a20-cc67-4814-bddc-2ea6cceb5a89\" name=\"Changes\" comment=\"\" />\r\n      <created>1741854397022</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1741854397022</updated>\r\n    </task>\r\n    <servers />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 29a09307640343153a48ab6667f1fa60d7535afb)
++++ b/.idea/workspace.xml	(date 1742993386933)
+@@ -1,18 +1,36 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
++  <component name="AutoImportSettings">
++    <option name="autoReloadType" value="SELECTIVE" />
++  </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="22215a20-cc67-4814-bddc-2ea6cceb5a89" name="Changes" comment="" />
++    <list default="true" id="22215a20-cc67-4814-bddc-2ea6cceb5a89" name="Changes" comment="">
++      <change beforePath="$PROJECT_DIR$/.idea/ProiectSI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ProiectSI.iml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
++    </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+     <option name="LAST_RESOLUTION" value="IGNORE" />
+   </component>
++  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
++    <envs>
++      <env key="FLASK_APP" value="app" />
++    </envs>
++    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
++    <option name="myEnvs">
++      <map>
++        <entry key="FLASK_APP" value="app" />
++      </map>
++    </option>
++  </component>
+   <component name="Git.Settings">
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+   </component>
+-  <component name="ProjectColorInfo"><![CDATA[{
+-  "associatedIndex": 4
+-}]]></component>
++  <component name="ProjectColorInfo">{
++  &quot;associatedIndex&quot;: 4
++}</component>
+   <component name="ProjectId" id="2uFpuERxgPJVpeWMz5M9ZLlNqof" />
+   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+   <component name="ProjectViewState">
+@@ -21,10 +39,42 @@
+   </component>
+   <component name="PropertiesComponent"><![CDATA[{
+   "keyToString": {
++    "RunOnceActivity.OpenProjectViewOnStart": "true",
+     "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "git-widget-placeholder": "master"
++    "WebServerToolWindowFactoryState": "false",
++    "git-widget-placeholder": "master",
++    "node.js.detected.package.eslint": "true",
++    "node.js.detected.package.tslint": "true",
++    "node.js.selected.package.eslint": "(autodetect)",
++    "node.js.selected.package.tslint": "(autodetect)",
++    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
++    "vue.rearranger.settings.migration": "true"
+   }
+ }]]></component>
++  <component name="RunManager">
++    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
++      <module name="ProiectSI" />
++      <option name="INTERPRETER_OPTIONS" value="" />
++      <option name="PARENT_ENVS" value="true" />
++      <envs>
++        <env name="PYTHONUNBUFFERED" value="1" />
++      </envs>
++      <option name="SDK_HOME" value="" />
++      <option name="WORKING_DIRECTORY" value="" />
++      <option name="IS_MODULE_SDK" value="false" />
++      <option name="ADD_CONTENT_ROOTS" value="true" />
++      <option name="ADD_SOURCE_ROOTS" value="true" />
++      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
++      <option name="SCRIPT_NAME" value="" />
++      <option name="PARAMETERS" value="" />
++      <option name="SHOW_COMMAND_LINE" value="true" />
++      <option name="EMULATE_TERMINAL" value="false" />
++      <option name="MODULE_MODE" value="false" />
++      <option name="REDIRECT_INPUT" value="false" />
++      <option name="INPUT_FILE" value="" />
++      <method v="2" />
++    </configuration>
++  </component>
+   <component name="SharedIndexes">
+     <attachedChunks>
+       <set>
+@@ -40,7 +90,11 @@
+       <option name="number" value="Default" />
+       <option name="presentableId" value="Default" />
+       <updated>1741854397022</updated>
++      <workItem from="1742974098597" duration="5858000" />
+     </task>
+     <servers />
+   </component>
++  <component name="TypeScriptGeneratedFilesManager">
++    <option name="version" value="3" />
++  </component>
+ </project>
+\ No newline at end of file
