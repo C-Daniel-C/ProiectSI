@@ -11,7 +11,11 @@ def mat_to_hex(in_mat):
             mat_hex.append(hex(in_mat[i][j]))
     mat_hex = np.array(mat_hex).reshape(4, 4)
     return mat_hex
-
+def array_to_hex(in_array):
+    out_array = []
+    for val in in_array:
+        out_array.append(hex(val))
+    return out_array
 
 def bitarray_to_int(inarr: bitarray):
     int_val = 0
@@ -72,7 +76,7 @@ class AES:
 
     def __str__(self):
         to_print = ""
-        # to_print = f"key:\n{hex(self.key)}\n"
+        #to_print = f"key:\n{mat_to_hex(self.key)}\n"
         to_print += f"state:\n{mat_to_hex(self.state)}\n"
         return to_print
 
@@ -82,6 +86,16 @@ class AES:
         while len(key_bytes) < 16:  # PKCS#7 padding: Adding the number of missing bytes
             key_bytes.append(dif)
 
+        self.key = np.array(key_bytes).reshape(4, 4, order='F')  # By columns
+
+    def set_example_state(self):
+        text_bytes = bytearray(
+            [0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34])
+        self.state = np.array(text_bytes).reshape(4, 4, order='F')  # By columns
+
+    def set_example_key(self):
+        key_bytes = bytearray(
+            [0x2b , 0x7e , 0x15 , 0x16 , 0x28 , 0xae , 0xd2 , 0xa6 , 0xab , 0xf7 , 0x15 , 0x88 , 0x09 , 0xcf , 0x4f , 0x3c])
         self.key = np.array(key_bytes).reshape(4, 4, order='F')  # By columns
 
     def sub_bytes(self):  # Re-assign values based on the AES S Box
@@ -123,74 +137,76 @@ class AES:
             p5 = fadd(p3, p4)
             col[3] = p5
             sp.append(col)
-        self.state = sp  # VERY UNSURE IF THIS WORKS
 
-    def key_expansion(self):
+        sp = np.transpose(sp)
+
+        self.state = sp
+
+    def key_expansion_o(self,rcon_index = 0):
         key = self.key.tolist()
-        key_count = 1
-
-        col_count = 0
+        full_key = []
+        col = [0] * 4
         index = 3
-        for r in range(0, 36):
-            full_key = []
-            col = [0] * 4
+        for i in range(0, 4):
+            col[i] = key[i][index]
+
+        # Rotate Phase:
+        carry = col[0]
+        col = col[1:4]
+        col.append(carry)
+
+        # Sub-Bytes Phase:
+        for i in range(0, 4):
+            splittable = format(col[i], '08b')  # Pads with 0
+            x = int(splittable[:4], base=2)  # First nibble (4 bits)
+            y = int(splittable[4:], base=2)  # Second nibble
+            col[i] = sbox[x][y]
+
+        # XOR Phase:
+        for i in range(0, 4):
+            col[i] = key[i][index - 3] ^ col[i]
+            col[i] = col[i] ^ rcon[i][rcon_index]
+
+        # Add to keys columns
+        #for i in range(0, 4):
+        #    key[i].append(col[i])
+        full_key.append(col)
+
+        #TODO: fix columns 1,2,3 and generate all keys based on this function
+        for index in range(1,4):
             for i in range(0, 4):
-                col[i] = key[i][index + r]
+                col[i] = key[i][index - 1] ^ col[i]
 
-            if r % 4 == 0:
-                # Rotate Phase:
-                carry = col[0]
-                col = col[1:4]
-                col.append(carry)
-
-                # Sub-Bytes Phase:
-                for i in range(0, 4):
-                    splittable = format(col[i], '08b')  # Pads with 0
-                    x = int(splittable[:4], base=2)  # First nibble (4 bits)
-                    y = int(splittable[4:], base=2)  # Second nibble
-                    col[i] = sbox[x][y]
-
-                # XOR Phase:
-                for i in range(0, 4):
-                    col[i] = key[i][r + index - 3] ^ col[i]
-                    col[i] = col[i] ^ rcon[i][r % 4]
-
-                # Add to keys columns
-                for i in range(0, 4):
-                    key[i].append(col[i])
-                full_key.append(col)
-            else:
-                for i in range(0, 4):
-                    col[i] = key[i][r + index - 1] ^ col[i]
-                # Add to keys columns
-                for i in range(0, 4):
-                    key[i].append(col[i])
-                full_key.append(col)
-
-            if r % 4 and r != 0:
-                self.keys.append(full_key)
-                full_key = []
+            # Add to keys columns
+            for i in range(0, 4):
+                key[i].append(col[i])
+            full_key.append(col)
+        print(mat_to_hex(full_key))
 
 
 if __name__ == '__main__':
     plain_text = "Hello World!"
-    plain_key = "abcdefghijklmop"
+    plain_key = "abcdefghijklmnop"
     aes = AES()
-    aes.create_state(plain_text)
-    aes.create_key(plain_key)
-    print(aes.key)
-    aes.key_expansion()
-    print(aes.keys) #TODO: FIX THIS
+    aes.set_example_state()
+    aes.set_example_key()
+    print(aes)
+    # aes.create_state(plain_text)
+    # print(aes.state)
+    # aes.create_key(plain_key)
 
-    # print(aes)
-    # aes.add_round_key()
-    # print(aes)
-    # aes.sub_bytes()
-    # print(aes)
-    # aes.shift_rows()
-    # print(aes)
-    # aes.mix_columns()
-    # print(aes)
+    aes.add_round_key()
+    print(aes)
+    aes.sub_bytes()
+    print(aes)
+    aes.shift_rows()
+    print(aes)
+    aes.mix_columns()
+    print(aes)
+
+    aes.key_expansion_o()
+    print(aes.keys) #TODO: FIX THIS
+    #print(aes)
 
 """ 
 Useful: https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
