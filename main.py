@@ -3,7 +3,7 @@ from copy import copy
 import numpy as np
 from bitarray import bitarray
 
-from aes_constants import sbox, rcon
+from aes_constants import sbox, invsbox, rcon
 
 
 def mat_to_hex(in_mat):
@@ -112,8 +112,19 @@ class AES:
                 y = int(splittable[4:], base=2)  # Second nibble
                 self.state[i][j] = sbox[x][y]
 
+    def inv_sub_bytes(self):  # Re-assign values based on the AES S InvBox
+        for i in range(0, 4):
+            for j in range(0, 4):
+                splittable = format(self.state[i][j], '08b')  # Pads with 0
+                x = int(splittable[:4], base=2)  # First nibble (4 bits)
+                y = int(splittable[4:], base=2)  # Second nibble
+                self.state[i][j] = invsbox[x][y]
+
     def shift_rows(self):  # Shift rows by their indices to the left
         self.state = [self.state[0], np.roll(self.state[1], -1), np.roll(self.state[2], -2), np.roll(self.state[3], -3)]
+
+    def inv_shift_rows(self):  # Shift rows by their indices to the right
+        self.state = [self.state[0], np.roll(self.state[1], 1), np.roll(self.state[2], 2), np.roll(self.state[3], 3)]
 
     def mix_columns(self):  # Page 17 https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.197.pdf
         # mix_mat = [[2, 3, 1, 1], [1, 2, 3, 1], [1, 1, 2, 3], [3, 1, 1, 2]]
@@ -144,6 +155,9 @@ class AES:
             col[3] = p5
             sp.append(col)
         self.state = np.transpose(sp)
+
+    def inv_mix_columns(self):
+        pass  # TODO
 
     def generate_key(self, old_key, key_number):
         full_key = []
@@ -204,31 +218,15 @@ class AES:
 
 if __name__ == '__main__':
     plain_text = "Hello World!"
-    plain_key = "abcdefghijklmop"
+    plain_key = "abcdefghijklmopq"
     aes = AES()
-    aes.create_state_example()
-    aes.create_key_example()
+    # aes.create_state_example()
+    # aes.create_key_example()
+    aes.create_state(plain_text)
+    aes.create_key(plain_key)
     print(aes)
     aes.cipher()
     print(aes)
-    # print("keys:")
-# for i in range(len(aes.keys)):
-#     print(mat_to_hex(aes.keys[i]))
-# aes.create_state(plain_text)
-# aes.create_key(plain_key)
-# print(aes.key)
-# aes.key_expansion()
-# print(aes.keys) #TODO: FIX THIS
-
-# print(aes)
-# aes.add_round_key()
-# print(aes)
-# aes.sub_bytes()
-# print(aes)
-# aes.shift_rows()
-# print(aes)
-# aes.mix_columns()
-# print(aes)
 
 """ 
 Useful: https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
