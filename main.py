@@ -33,7 +33,8 @@ def bitarray_to_int(inarr: bitarray):
 
 
 def fmul(b, mul):
-    b = bitarray(format(b, '08b'))
+    if type(b) is not bitarray:
+        b = bitarray(format(b, '08b'))
     ori = b.copy()
 
     if mul == 1:
@@ -53,10 +54,20 @@ def fmul(b, mul):
             b <<= 1
             b = b ^ bitarray('00011011')
             b = b ^ ori
+    elif mul == 9:
+        b = fadd(fmul(fmul(fmul(b, 2), 2), 2),b)
+    elif mul == 11:
+        b = fadd(fmul(fadd(fmul(fmul(b, 2), 2), b), 2), b)
+    elif mul == 13:
+        b = fadd(fmul(fadd(fmul(fmul(b, 2), b), 2), 2), b)
+    elif mul == 14:
+        b = fadd(fmul(fadd(fmul(fmul(b, 2), b), 2), b), b)
     return bitarray_to_int(b)
 
 
 def fadd(a, b):
+    if type(b) is bitarray:
+        b = bitarray_to_int(b)
     return a ^ b
 
 
@@ -157,7 +168,38 @@ class AES:
         self.state = np.transpose(sp)
 
     def inv_mix_columns(self):
-        pass  # TODO
+        s = copy(self.state)
+        sp = []
+        for c in range(0, 4):
+            col = [0] * 4
+            p1 = fmul(s[0][c],0x0E)
+            p2 = fmul(s[1][c],0x0B)
+            p3 = fmul(s[2][c],0x0D)
+            p4 = fmul(s[3][c],0x09)
+            col[0] = fadd(fadd(fadd(p1,p2),p3),p4)
+
+            p1 = fmul(s[0][c],0x09)
+            p2 = fmul(s[1][c],0x0E)
+            p3 = fmul(s[2][c],0x0B)
+            p4 = fmul(s[3][c],0x0D)
+            col[1] = fadd(fadd(fadd(p1,p2),p3),p4)
+
+
+            p1 = fmul(s[0][c],0x0D)
+            p2 = fmul(s[1][c],0x09)
+            p3 = fmul(s[2][c],0x0E)
+            p4 = fmul(s[3][c],0x0B)
+            col[2] = fadd(fadd(fadd(p1,p2),p3),p4)
+
+
+            p1 = fmul(s[0][c],0x0B)
+            p2 = fmul(s[1][c],0x0D)
+            p3 = fmul(s[2][c],0x09)
+            p4 = fmul(s[3][c],0x0e)
+            col[3] = fadd(fadd(fadd(p1,p2),p3),p4)
+
+            sp.append(col)
+        self.state = np.transpose(sp)
 
     def generate_key(self, old_key, key_number):
         full_key = []
@@ -215,6 +257,22 @@ class AES:
         self.key_index += 1
         self.add_round_key()
 
+    def decipher(self):
+        self.keys = []
+        self.key_index = 0
+        self.key_expansion()
+        self.add_round_key()
+        for i in range(1, 10):
+            self.key_index = i
+            self.inv_sub_bytes()
+            self.inv_shift_rows()
+            self.inv_mix_columns()
+            # print(mat_to_hex(self.state))
+            self.add_round_key()
+        self.inv_sub_bytes()
+        self.inv_shift_rows()
+        self.key_index += 1
+        self.add_round_key()
 
 if __name__ == '__main__':
     plain_text = "Hello World!"
@@ -227,7 +285,8 @@ if __name__ == '__main__':
     print(aes)
     aes.cipher()
     print(aes)
-
+    aes.decipher()
+    print(aes)
 """ 
 Useful: https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
 """
