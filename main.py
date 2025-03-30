@@ -66,8 +66,6 @@ def fmul(b, mul):
 
 
 def fadd(a, b):
-    if type(b) is bitarray:
-        b = bitarray_to_int(b)
     return a ^ b
 
 
