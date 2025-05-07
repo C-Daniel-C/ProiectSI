@@ -29,7 +29,6 @@ def hex_mat_to_ascii(in_arr):
             text += chr(in_arr[i][j])
     return text
 
-
 def bitarray_to_int(inarr: bitarray):
     int_val = 0
     p = 1
@@ -93,7 +92,7 @@ class AES:
         self.key_index = 0
 
     def create_state(self, p_text):
-        text_bytes = bytearray(p_text.encode())
+        text_bytes = bytearray(p_text.encode('latin-1'))
         dif = (16 - len(text_bytes))
         while len(text_bytes) < 16:  # PKCS#7 padding: Adding the number of missing bytes
             text_bytes.append(dif)
@@ -288,22 +287,25 @@ class AES:
 
 
 if __name__ == '__main__':
-    plain_text = "Hello World!"
+    plain_text = "Hello World!    "
     plain_key = "abcdefghijklmopq"
     aes = AES()
-    aes.create_state_example()
-    aes.create_key_example()
-    #aes.create_state(plain_text)
-    print(hex_mat_to_ascii(aes.state))
-    #aes.create_key(plain_key)
+    #aes.create_state_example()
+    #aes.create_key_example()
+    aes.create_state(plain_text)
+    aes.create_key(plain_key)
     print(aes)
     aes.cipher()
+    print(hex_mat_to_ascii(aes.state).encode('latin-1'))
+    state_ascii=hex_mat_to_ascii(aes.state)
+    print(repr(state_ascii))
+    aes.create_state(state_ascii)
     print(aes)
 
-    aes.create_key_example()
+    #aes.create_key_example()
+    aes.create_key(plain_key)
     aes.decipher()
     print(aes)
-    print(hex_mat_to_ascii(aes.state))
 
 """ 
 Useful: https://formaestudio.com/rijndaelinspector/archivos/Rijndael_Animation_v4_eng-html5.html
