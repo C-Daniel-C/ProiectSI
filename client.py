@@ -1,12 +1,25 @@
 import socket
 from threading import Thread
 import random
+import os
+
+import rsa
+import main
+
 IP="127.0.0.1"
 PORT=random.randint(20000, 65535)
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.bind((IP,PORT))
 
 option_select=False
+rsa_public_key, rsa_private_key=rsa.generate_keys(512)
+
+aes_key_public=os.urandom(8).hex()
+print(aes_key_public)
+self_aes=main.AES()
+self_aes.create_key(aes_key_public)
+print(self_aes.key)
+
 
 def listen():
     client_socket.listen(1)
@@ -42,13 +55,43 @@ def sender(conn):
 
 print(IP," ",PORT)
 conn=""
+recv_rsa_public_key=""
 while not option_select:
     option=input("CONNECT/LISTEN")
     if option=="CONNECT":
         option_select=connect(IP,int(input("PORT: ")))
         conn=client_socket
+
+        # RSA EXCHANGE KEY (OTHER)
+        data=conn.recv(1024)
+        recv_rsa_public_key = rsa.format_json_key_to_tuple(data)
+
+        print(recv_rsa_public_key)
+
+        # RSA EXCHANGE KEY (SELF)
+        conn.send(rsa.json_key(rsa_public_key).encode('utf-8'))
+        print(rsa_public_key)
+
+
+        # AES EXCHANGE KEY
+        encrypted_other_rsa_aes_key=rsa.encrypt_string(aes_key_public)
+
     elif option=="LISTEN":
-        conn,addr,option_select=listen()
+
+        conn, addr, option_select = listen()
+
+        # RSA EXCHANGE KEY (SELF)
+        conn.send(rsa.json_key(rsa_public_key).encode('utf-8'))
+        print(rsa_public_key)
+
+        # RSA EXCHANGE KEY (OTHER)
+        data=conn.recv(1024)
+        recv_rsa_public_key = rsa.format_json_key_to_tuple(data)
+        print(recv_rsa_public_key)
+
+        # AES EXCHANGE KEY
+
+
         print(addr)
 
 
