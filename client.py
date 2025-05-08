@@ -38,7 +38,7 @@ def connect(ip="127.0.0.1", port=12345):
 
 def receiver(conn):
     while True:
-        received_message = conn.recv(1024).decode('latin-1')  # decode with latin-1 to match encoding
+        received_message = conn.recv(1024).decode('latin-1')
         print(received_message)
         print(f"Received message length: {len(received_message)}")
 
@@ -53,14 +53,15 @@ def receiver(conn):
 
             self_aes.create_state(message_block)
             self_aes.create_key(aes_key_self)
+            print(f"AES Key = {self_aes.key}")
             self_aes.decipher()
-            print(self_aes)
+            #print(self_aes)
             decrypted_block = main.hex_mat_to_ascii(self_aes.state)
-            print(f"Decrypted block {i}: {decrypted_block}")
+            #print(f"Decrypted block {i}: {decrypted_block}")
             if i == size16blocks - 1:
                 decrypted_block = remove_padding_from_string(decrypted_block)
 
-            print(f"Decrypted block {i}: {repr(decrypted_block)}")
+            #print(f"Decrypted block {i}: {repr(decrypted_block)}")
 
             decrypted_message += decrypted_block
 
@@ -90,16 +91,17 @@ def sender(conn):
             #     pad_len = 16 - len(message_block)
             #     message_block += chr(pad_len) * pad_len
 
-            print(f"Block {i}: {repr(message_block)}")
-
+            #print(f"Block {i}: {repr(message_block)}")
             other_AES.create_state(message_block)
             other_AES.create_key(recv_aes_key)
-            print(f"Message block {i}: {main.hex_mat_to_ascii(other_AES.state)}")
+            print(f"AES Key = {other_AES.key}")
+            #print(f"Message block {i}: {main.hex_mat_to_ascii(other_AES.state)}")
             other_AES.cipher()
             encrypted_block = main.hex_mat_to_ascii(other_AES.state)
+            print(other_AES)
 
             crypted_message += encrypted_block
-            print(f"Encrypted block {i}: {encrypted_block}")
+            #print(f"Encrypted block {i}: {encrypted_block}")
 
         print(f"Final encrypted message length: {len(crypted_message)}")
 

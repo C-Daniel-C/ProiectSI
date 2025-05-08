@@ -92,6 +92,7 @@ class AES:
         self.key_index = 0
 
     def create_state(self, p_text):
+        self.state= None
         text_bytes = bytearray(p_text.encode('latin-1'))
         dif = (16 - len(text_bytes))
         while len(text_bytes) < 16:  # PKCS#7 padding: Adding the number of missing bytes
@@ -117,6 +118,8 @@ class AES:
 
     def create_key(self, p_key):
         key_bytes = bytearray(p_key.encode())
+        self.keys = []
+        self.key_index = 0
         dif = (16 - len(key_bytes))
         while len(key_bytes) < 16:  # PKCS#7 padding: Adding the number of missing bytes
             key_bytes.append(dif)
@@ -287,7 +290,7 @@ class AES:
 
 
 if __name__ == '__main__':
-    plain_text = "Hello World!    "
+    plain_text = "Hello World!"
     plain_key = "abcdefghijklmopq"
     aes = AES()
     #aes.create_state_example()
@@ -305,6 +308,23 @@ if __name__ == '__main__':
     #aes.create_key_example()
     aes.create_key(plain_key)
     aes.decipher()
+    print(hex_mat_to_ascii(aes.state).encode('latin-1'))
+
+    plain_text="AAAAAAAI"
+
+    aes.create_state(plain_text)
+    aes.create_key(plain_key)
+    print(aes)
+    aes.cipher()
+    print(hex_mat_to_ascii(aes.state).encode('latin-1'))
+    state_ascii=hex_mat_to_ascii(aes.state)
+    print(repr(state_ascii))
+    aes.create_state(state_ascii)
+    print(aes)
+
+    aes.create_key(plain_key)
+    aes.decipher()
+    print(hex_mat_to_ascii(aes.state).encode('latin-1'))
     print(aes)
 
 """ 

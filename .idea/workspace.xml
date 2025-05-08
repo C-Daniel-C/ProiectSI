@@ -118,6 +118,9 @@
       <module name="ProiectSI" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -157,8 +160,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
         <item itemvalue="Python.client" />
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.server" />
       </list>
     </recent_temporary>
@@ -180,6 +183,7 @@
       <updated>1741854397022</updated>
       <workItem from="1742974098597" duration="9541000" />
       <workItem from="1746600867578" duration="28346000" />
+      <workItem from="1746687467213" duration="4454000" />
     </task>
     <task id="LOCAL-00001" summary="Server-Client Multi-Threading">
       <created>1743000246977</created>
@@ -231,19 +235,8 @@
     <MESSAGE value="RSA Algorithm" />
     <option name="LAST_COMMIT_MESSAGE" value="RSA Algorithm" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/client.py</url>
-          <line>53</line>
-          <option name="timeStamp" value="12" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProiectSI$main.coverage" NAME="main Coverage Results" MODIFIED="1746628092835" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ProiectSI$client.coverage" NAME="client Coverage Results" MODIFIED="1746654269229" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ProiectSI$client.coverage" NAME="client Coverage Results" MODIFIED="1746689671223" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
