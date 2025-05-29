@@ -6,6 +6,8 @@ from bitarray import bitarray
 from aes_constants import sbox, invsbox, rcon
 
 
+
+
 def mat_to_hex(in_mat):
     mat_hex = []
     for i in range(0, 4):
