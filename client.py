@@ -10,6 +10,8 @@ import mainUI
 from PyQt5.QtWidgets import QApplication, QDialog
 
 
+
+
 class CommunicatorWindow(QDialog):
     def __init__(self):
         super().__init__()
